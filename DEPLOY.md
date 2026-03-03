@@ -19,14 +19,14 @@ bash
 git add .
 git commit -m "Prepare for Railway deployment"
 git pull origin main --allow-unrelated-histories
+# Git will open an editor - type ":wq" to save and exit
 git push origin main
 ```
 
-**Option B - Force push (WARNING: overwrites remote):**
+**Option B - If merge is stuck/aborted (use this):**
 ```
 bash
-git add .
-git commit -m "Prepare for Railway deployment"
+git merge --abort
 git push -f origin main
 ```
 
