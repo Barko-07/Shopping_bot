@@ -87,6 +87,9 @@ async def health_check():
 # Start the server
 def start():
     """Start the FastAPI server."""
+    import os
+    is_production = os.environ.get("RAILWAY_ENVIRONMENT") is not None
+    
     print(f"🚀 Starting FastAPI server on {config.API_HOST}:{config.API_PORT}")
     print(f"📚 Documentation available at http://{config.API_HOST}:{config.API_PORT}/docs")
     
@@ -94,7 +97,7 @@ def start():
         "api.main:app",  # Correct import path for your FastAPI app
         host=config.API_HOST,
         port=config.API_PORT,
-        reload=True,  # Only use reload=True in development
+        reload=False,  # Disable reload in production
         log_level="info"
     )
 
