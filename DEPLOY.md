@@ -10,9 +10,18 @@
 
 ### Step 1: Push Code to GitHub
 
-1. Create a new GitHub repository
-2. Push your code:
+1. Create a new GitHub repository at https://github.com/new
+2. Push your code (choose ONE option below):
 
+**Option A - If remote origin already exists:**
+```
+bash
+git add .
+git commit -m "Prepare for Railway deployment"
+git push origin main
+```
+
+**Option B - If starting fresh:**
 ```
 bash
 git init
@@ -20,6 +29,13 @@ git add .
 git commit -m "Initial commit"
 git branch -M main
 git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+git push -u origin main
+```
+
+**Option C - If you want to change the remote:**
+```
+bash
+git remote set-url origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
 git push -u origin main
 ```
 
