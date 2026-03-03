@@ -13,12 +13,21 @@
 1. Create a new GitHub repository at https://github.com/new
 2. Push your code (choose ONE option below):
 
-**Option A - If remote origin already exists:**
+**Option A - If remote has existing files (recommended):**
 ```
 bash
 git add .
 git commit -m "Prepare for Railway deployment"
+git pull origin main --allow-unrelated-histories
 git push origin main
+```
+
+**Option B - Force push (WARNING: overwrites remote):**
+```
+bash
+git add .
+git commit -m "Prepare for Railway deployment"
+git push -f origin main
 ```
 
 **Option B - If starting fresh:**
