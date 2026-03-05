@@ -41,6 +41,7 @@ git push origin main
     | Setting         | Value                                              |
     | --------------- | -------------------------------------------------- |
     | **Name**        | `samira-bot` (or any unique name)                  |
+    | **Root Directory**| *Leave blank*                                      |
     | **Runtime**     | `Python 3`                                         |
     | **Build Command** | `pip install -r requirements.txt`                  |
     | **Start Command** | `uvicorn main:app --host 0.0.0.0 --port 10000`     |
@@ -96,8 +97,10 @@ This will ping your bot every 5 minutes, keeping it awake and running continuous
 
 *   **Deploy Failed / Application Error**:
     *   This is almost always an incorrect **Start Command**.
-    *   Check your Render logs. If you see `ModuleNotFoundError` or `AttributeError`, it confirms the start command is wrong.
-    *   **Fix**: Go to your project's **Settings** tab on Render, update the **Start Command** to match your filename and FastAPI variable name (`filename:app_variable`), and save the changes to trigger a new deploy.
+    *   **Error:** `Error loading ASGI app. Could not import module "main"` or `ModuleNotFoundError`.
+    *   **Cause:** Your main Python file is not named `main.py`.
+    *   **Fix:** Check your repository for the correct filename (e.g., `bot.py`, `app.py`). Go to **Settings** on Render and update the **Start Command**.
+        *   If file is `bot.py`: `uvicorn bot:app --host 0.0.0.0 --port 10000`
 
 *   **Bot is Not Responding**:
     *   Check the **Logs** tab on Render. Look for any runtime errors after "Bot started!".
