@@ -1,150 +1,108 @@
-# Railway Deployment Guide for Samira Home Fashion Bot
+# Render.com Deployment Guide for Samira Home Fashion Bot
 
-## Quick Deploy (One-Click)
-
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/your-repo-link)
+This guide provides step-by-step instructions for deploying your Python Telegram bot to Render's free tier, ensuring it runs 24/7.
 
 ---
 
-## Manual Deployment Steps
+## Step 1: Prepare Your Project for Deployment
 
-### Step 1: Push Code to GitHub
+Before deploying, make sure your project is ready.
 
-1. Create a new GitHub repository at https://github.com/new
-2. Push your code (choose ONE option below):
+### 1. Finalize `requirements.txt`
+Your `requirements.txt` file looks correct. No changes are needed.
 
-**Option A - If remote has existing files (recommended):**
-```
-bash
+### 2. Push Your Code to GitHub
+Ensure all your latest code is on a GitHub repository.
+
+```bash
+# Add all your changes
 git add .
-git commit -m "Prepare for Railway deployment"
-git pull origin main --allow-unrelated-histories
-# Git will open an editor - type ":wq" to save and exit
+
+# Commit the changes
+git commit -m "Ready for Render deployment"
+
+# Push to your main branch
 git push origin main
 ```
 
-**Option B - If merge is stuck/aborted (use this):**
-```
-bash
-git merge --abort
-git push -f origin main
-```
+---
 
-**Option B - If starting fresh:**
-```
-bash
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
-git push -u origin main
-```
+## Step 2: Deploy on Render.com
 
-**Option C - If you want to change the remote:**
-```
-bash
-git remote set-url origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
-git push -u origin main
-```
+1.  **Create an Account**: Go to dashboard.render.com and sign up using your GitHub account.
 
-### Step 2: Create Railway Account
+2.  **Create a New Web Service**:
+    *   On your dashboard, click **New +** and select **Web Service**.
+    *   Choose **Build and deploy from a Git repository** and connect the GitHub repository for your bot.
 
-1. Go to [Railway.app](https://railway.app)
-2. Sign up with your GitHub account
-3. Verify your email
+3.  **Configure the Service**:
+    On the settings page, fill in the details exactly as follows:
 
-### Step 3: Create New Project
+    | Setting         | Value                                              |
+    | --------------- | -------------------------------------------------- |
+    | **Name**        | `samira-bot` (or any unique name)                  |
+    | **Runtime**     | `Python 3`                                         |
+    | **Build Command** | `pip install -r requirements.txt`                  |
+    | **Start Command** | `uvicorn main:app --host 0.0.0.0 --port 10000`     |
 
-1. Click "New Project" → "Deploy from GitHub repo"
-2. Select your repository
-3. Wait for the build to complete
-
-### Step 4: Configure Environment Variables
-
-In Railway dashboard, go to **Variables** tab and add:
-
-| Variable | Value | Description |
-|----------|-------|-------------|
-| `BOT_TOKEN` | `your_telegram_bot_token` | Get from @BotFather |
-| `ADMIN_IDS` | `[123456789]` | Your Telegram user ID |
-| `DATABASE_URL` | `sqlite+aiosqlite:///shop.db` | Keep default |
-| `API_PORT` | `8000` | Keep default |
-| `API_HOST` | `0.0.0.0` | Keep default |
-
-**To get your Telegram User ID:**
-- Message @userinfobot on Telegram
-- It will show your ID
-
-### Step 5: Deploy
-
-1. Click "Deploy" button
-2. Wait for deployment to complete (2-5 minutes)
-3. Check logs for "Bot started!" message
+    > **CRITICAL:** The **Start Command** (`uvicorn main:app ...`) must match your project structure.
+    > *   `main`: Refers to the Python file `main.py`. If your file is `bot.py`, change this to `bot`.
+    > *   `app`: Refers to the FastAPI instance, like `app = FastAPI()`. If you named it `my_app = FastAPI()`, change this to `my_app`.
 
 ---
 
-## Important Notes
+## Step 3: Add Environment Variables
 
-### Static Files (Images)
-Railway's filesystem is ephemeral - uploaded images will be deleted on restart. 
+1.  After configuring the service, scroll down to the **Environment** section.
+2.  Click **Add Environment Variable** and add the following keys and their corresponding values:
 
-**Solution:** Use external storage like:
-- Cloudinary (recommended)
-- AWS S3
-- Or enable persistent disks on Railway (paid)
+    | Key            | Value                                     | Description                               |
+    | -------------- | ----------------------------------------- | ----------------------------------------- |
+    | `BOT_TOKEN`    | `your_telegram_bot_token`                 | Get this from Telegram's @BotFather.      |
+    | `ADMIN_IDS`    | `[123456789]`                             | Your Telegram User ID from @userinfobot.  |
+    | `DATABASE_URL` | `sqlite+aiosqlite:///data/shop.db`        | **Important:** Use `/data/` for Render's persistent disk. |
+    | `PYTHON_VERSION` | `3.11.9`                                  | Ensures Render uses a specific Python version. |
 
-### Database
-SQLite works on Railway but resets on each deployment. 
+    > **Database Path on Render:** Render provides a persistent disk at `/data`. By setting the database path to `/data/shop.db`, your SQLite database **will persist** between restarts and deploys on the free tier.
 
-**For production, use PostgreSQL:**
-1. In Railway: Add → Database → PostgreSQL
-2. Get connection string from Variables
-3. Update `DATABASE_URL` in your Railway variables
+3.  Click **Create Web Service** at the bottom of the page. Render will now start building and deploying your bot.
 
 ---
 
-## After Deployment
+## Step 4: Keep the Bot Running 24/7
 
-1. **Telegram Bot**: Will start polling automatically
-2. **API**: Available at `https://your-project-name.up.railway.app`
-3. **API Docs**: `https://your-project-name.up.railway.app/docs`
+Render's free services "spin down" after 15 minutes of inactivity. To prevent this, use a free monitoring service.
 
----
+1.  **Get Your Service URL**: On your Render dashboard, find the URL for your new service. It will look like `https://samira-bot.onrender.com`.
 
-## Troubleshooting
+2.  **Set Up UptimeRobot**:
+    *   Sign up for a free account at UptimeRobot.com.
+    *   Click **+ Add New Monitor**.
+    *   **Monitor Type**: `HTTP(s)`
+    *   **Friendly Name**: `Samira Bot Monitor`
+    *   **URL (or IP)**: Paste your Render service URL here.
+    *   **Monitoring Interval**: Set to **5 minutes**.
+    *   Click **Create Monitor**.
 
-### Bot not responding?
-- Check logs in Railway dashboard
-- Ensure BOT_TOKEN is correct
-- Verify ADMIN_IDS format: `[123456789]` (not "123456789")
-
-### Deploy failed?
-- Check the "Deploy" logs for errors
-- Ensure all required packages are in requirements.txt
-
-### Need to restart bot?
-- In Railway: Click "Redeploy" button
+This will ping your bot every 5 minutes, keeping it awake and running continuously.
 
 ---
 
-## Keeping Bot Online (Free Tier)
+## Troubleshooting Common Errors
 
-Railway's free tier puts apps to sleep after 5 minutes of inactivity. 
+*   **Build Failed**:
+    *   Go to the **Events** tab for your service on Render.
+    *   Look at the build logs. The error is usually a typo in `requirements.txt` or a missing dependency.
 
-**Workaround:** Use a free uptime monitor:
-1. Sign up at [UptimeRobot.com](https://uptimerobot.com)
-2. Add a monitor for your API URL
-3. Set interval to every 5 minutes
-4. This keeps your bot awake!
+*   **Deploy Failed / Application Error**:
+    *   This is almost always an incorrect **Start Command**.
+    *   Check your Render logs. If you see `ModuleNotFoundError` or `AttributeError`, it confirms the start command is wrong.
+    *   **Fix**: Go to your project's **Settings** tab on Render, update the **Start Command** to match your filename and FastAPI variable name (`filename:app_variable`), and save the changes to trigger a new deploy.
 
----
+*   **Bot is Not Responding**:
+    *   Check the **Logs** tab on Render. Look for any runtime errors after "Bot started!".
+    *   Verify that your `BOT_TOKEN` in the Environment Variables is correct.
+    *   Make sure your UptimeRobot monitor is active and pointing to the correct `.onrender.com` URL.
 
-## Cost Estimate
-
-| Service | Free Tier | Paid |
-|---------|-----------|------|
-| Railway | 500 hours/month | $5+/month |
-| Telegram Bot | Free | Free |
-
-For a personal bot, the free tier should work well!
+*   **Database Issues**:
+    *   Ensure your `DATABASE_URL` is set to `sqlite+aiosqlite:///data/shop.db` to use Render's free persistent disk. If you forget the `/data/` prefix, your database will be wiped on every deploy.
